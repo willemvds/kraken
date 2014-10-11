@@ -16,24 +16,29 @@ const (
 	JOB_REMOTE_CONNECTION_CLOSED
 )
 
-type commander interface {
-	Command() ([]byte, error)
+// Commander will receive terminal output and be asked what to do next
+// by calling NextCommand until ErrNoMoreCommands is returned.
+type Commander interface {
+	NextCommand() ([]byte, error)
 	io.Writer
 }
 
 type Job struct {
 	sshclient  sshClient
-	commander  commander
+	commander  Commander
 	statusChan chan jobStatus
 }
 
-func NewJob(addr string, conf *ssh.ClientConfig, c commander) *Job {
+func NewJob(addr string, conf *ssh.ClientConfig, c Commander) *Job {
 	job := Job{}
 	job.sshclient = sshClient{address: addr, config: conf}
 	job.commander = c
 	return &job
 }
 
+// Start connects using the provided SSH details and reads/writes
+// data over the connection. It also returns a channel to read
+// job status messages from.
 func (job *Job) Start() (<-chan jobStatus, error) {
 	if err := job.sshclient.Connect(); err != nil {
 		return nil, err
@@ -57,7 +62,7 @@ func (job *Job) startCommandLoop() error {
 		job.statusChan <- JOB_REMOTE_CONNECTION_CLOSED
 	}()
 	go func() {
-		for command, err := job.commander.Command(); err != ErrNoMoreCommands; command, err = job.commander.Command() {
+		for command, err := job.commander.NextCommand(); err != ErrNoMoreCommands; command, err = job.commander.NextCommand() {
 			job.sshclient.Write(command)
 		}
 		job.statusChan <- JOB_NO_MORE_COMMANDS
@@ -65,6 +70,8 @@ func (job *Job) startCommandLoop() error {
 	return nil
 }
 
+// Complete is used to tell the job that it can perform cleanup
+// like closing the shh connection.
 func (job *Job) Complete() error {
 	return job.sshclient.Close()
 }
