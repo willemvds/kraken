@@ -73,5 +73,6 @@ func (job *Job) startCommandLoop() error {
 // Complete is used to tell the job that it can perform cleanup
 // like closing the shh connection.
 func (job *Job) Complete() error {
+	defer close(job.statusChan)
 	return job.sshclient.Close()
 }
