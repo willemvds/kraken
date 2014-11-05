@@ -78,6 +78,7 @@ func main() {
 		status := <-statusChan
 		if status == kraken.JOB_REMOTE_CONNECTION_CLOSED {
 			fmt.Println("Remote connection closed, bye.")
+			job.Complete()
 			break
 		}
 	}
