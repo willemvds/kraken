@@ -8,7 +8,7 @@ import (
 
 type ShellCommander struct {
 	cmdQueue chan []byte
-	buf      bytes.Buffer
+	Buf      bytes.Buffer
 }
 
 func (sc *ShellCommander) NextCommand() ([]byte, error) {
@@ -20,7 +20,7 @@ func (sc *ShellCommander) NextCommand() ([]byte, error) {
 }
 
 func (sc *ShellCommander) Write(bs []byte) (int, error) {
-	return sc.buf.Write(bs)
+	return sc.Buf.Write(bs)
 }
 
 func (sc *ShellCommander) AddCommand(cmd []byte) {
