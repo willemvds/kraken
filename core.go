@@ -31,7 +31,7 @@ type Job struct {
 
 func NewJob(addr string, conf *ssh.ClientConfig, c Commander) *Job {
 	job := Job{}
-	job.sshclient = sshClient{address: addr, config: conf}
+	job.sshclient = sshClient{address: addr, config: conf, ptyHeight:100, ptyWidth:180}
 	job.commander = c
 	return &job
 }

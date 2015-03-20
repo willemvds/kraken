@@ -14,6 +14,8 @@ type sshClient struct {
 	address string
 	config  *ssh.ClientConfig
 	ptyType string
+	ptyHeight int
+	ptyWidth int
 
 	client  *ssh.Client
 	session *ssh.Session
@@ -65,7 +67,7 @@ func (sshclient *sshClient) Connect() error {
 		return err
 	}
 
-	if err = sshclient.session.RequestPty(sshclient.ptyType, 80, 40, nil); err != nil {
+	if err = sshclient.session.RequestPty(sshclient.ptyType, sshclient.ptyHeight, sshclient.ptyWidth, nil); err != nil {
 		return err
 	}
 
